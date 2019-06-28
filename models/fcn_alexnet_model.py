@@ -5,57 +5,111 @@ from tensorflow.keras import layers,losses,models
 CHANNELS = 3
 N_CLASSES = 2
 
+
 class FcnAlexnetModel(BaseModel):
     def __init(self,config):
         super(FcnAlexnetModel,self).__init__(config)
         
     def build_model(self):
-        """"
-        Keras Functional API
-        """"
+        self.is_training = tf.placeholder(tf.bool)
         [height,width] = self.config.image_size
-        self.inputs = layers.Input(shape=(height,width,CHANNELS))
+        with tf.name_scope("inputs") : 
+            self.X = tf.placeholder(tf.float32,shape=(None,height,width,CHANNELS),name="X")
+            self.y = tf.placeholder(tf.int32,shape=(None,height,width),name="y")
         
-        # the base net
-        self.conv1 = layers.Conv2D(96,kernel_size=(11,11),strides=(4,4),padding='valid')(self.inputs)
-        self.conv1 = layers.Activation('relu')(self.conv1)
-        self.pool1 = layers.MaxPooling2D(pool_size=(3,3),strides=(2,2),padding='same')(self.conv1)
-        self.norm1 = layers.BatchNormalization()(self.pool1)
-        
-        self.conv2 = layers.Conv2D(256,kernel_size=(5,5),strides=(1,1),padding='same')(self.norm1)
-        self.conv2 = layers.Activation('relu')(self.conv2)
-        self.pool2 = layers.MaxPooling2D(pool_size=(3,3),strides=(2,2),padding='same')(self.conv2)
-        self.norm2 = layers.BatchNormalization()(self.pool2)
-        
-        self.conv3 = layers.Conv2D(384,kernel_size=(3,3),strides=(1,1),padding='same')(self.norm2)
-        self.conv3 = layers.Activation('relu')(self.conv3)
-        self.conv4 = layers.Conv2D(384,kernel_size=(3,3),strides=(1,1),padding='same')(self.conv3)
-        self.conv4 = layers.Activation('relu')(self.conv4)
-        self.conv5 = layers.Conv2D(256,kernel_size=(3,3),strides=(1,1),padding='same')(self.conv4)
-        self.conv5 = layers.Activation('relu')(self.conv5)
-        self.pool5 = layers.MaxPooling2D(pool_size=(3,3),strides=(2,2),padding='same')(self.conv5)
-        
-        # fully convolutional net
-        self.fc6 = layers.Conv2D(4096,kernel_size=(6,6),strides=(1,1),padding='same')(self.pool5)
-        self.fc6 = layers.Activation('relu')(self.fc6)
-        self.drop6 = layers.Dropout(rate=0.5)(self.fc6)
-        
-        self.fc7 = layers.Conv2D(4096,kernel_size=(1,1),strides=(1,1),padding='same')(self.drop6)
-        self.fc7 = layers.Activation('relu')(self.fc7)
-        self.drop7 = layers.Dropout(rate=0.5)(self.fc7)
-        
-        self.fc8 = layers.Conv2D(N_CLASSES,kernel_size=(1,1),strides=(1,1),padding='same')(self.drop7)
-        self.last_layer = layers.Conv2DTranspose(N_CLASSES,(63,63),strides=(32,32),padding="same")(self.fc8)
-        self.outputs = layers.Softmax()(self.last_layer)
-        
-        self.model = models.Model([self.inputs],[self.outputs],name='fcn_alexnet')                           
-        print("Build model successfully")
-        
-        self.model.compile(
-            loss='sparse_categorical_crossentropy',
-            optimizer='adam',
-            metrics=['acc'],
-        )
+        # FCN-Alexnet architecture
+        self.conv0 = tf.layers.conv2d(self.X,filters=96,
+                                 kernel_size=11,
+                                 strides=4,
+                                 padding="VALID",
+                                 activation=tf.nn.relu,
+                                 name="conv_0")
+
+        self.pool0 = tf.nn.max_pool(self.conv0,ksize=[1,3,3,1],strides=[1,2,2,1],padding="SAME",name='pool_0')
+
+        self.conv1 = tf.layers.conv2d(self.pool0,filters=256,
+                                 kernel_size=5,
+                                 strides=1,
+                                 padding="SAME",
+                                 activation=tf.nn.relu,
+                                 name="conv_1")
+
+        self.pool1 = tf.nn.max_pool(self.conv1,ksize=[1,3,3,1],strides=[1,2,2,1],padding="SAME",name='pool_1')
+
+        self.conv2 = tf.layers.conv2d(self.pool1,filters=384,
+                                 kernel_size=3,
+                                 strides=1,
+                                 padding="SAME",
+                                 activation=tf.nn.relu,
+                                 name="conv_2")
+
+        self.conv3 = tf.layers.conv2d(self.conv2,filters=384,
+                                 kernel_size=3,
+                                 strides=1,
+                                 padding="SAME",
+                                 activation=tf.nn.relu,
+                                 name="conv_3")
+
+        self.conv4 = tf.layers.conv2d(self.conv3,filters=256,
+                                 kernel_size=3,
+                                 strides=1,
+                                 padding="SAME",
+                                 activation=tf.nn.relu,
+                                 name="conv_4")
+
+        self.pool2 = tf.nn.max_pool(self.conv4,ksize=[1,3,3,1],strides=[1,2,2,1],padding="SAME",name='pool_2')
+
+
+        self.conv5 =  tf.layers.conv2d(self.pool2,filters=4096,
+                                 kernel_size=6,
+                                 strides=1,
+                                 padding="SAME",
+                                 activation=tf.nn.relu,
+                                 name="conv_5")
+
+        self.dropout0 = tf.layers.dropout(self.conv5,rate=0.5,name='dropout0')
+
+        self.conv6 =  tf.layers.conv2d(self.dropout0,filters=4096,
+                                 kernel_size=1,
+                                 strides=1,
+                                 padding="SAME",
+                                 activation=tf.nn.relu,
+                                 name="conv_6")
+
+        self.dropout1 = tf.layers.dropout(self.conv6,rate=0.5,name='dropout1')
+
+        self.conv7 = tf.layers.conv2d(self.dropout1,filters=N_CLASSES,
+                                kernel_size=1,
+                                strides=1,
+                                padding="VALID",
+                                name="conv7")
+
+        self.deconv = tf.layers.conv2d_transpose(self.conv7,filters=N_CLASSES,
+                                        kernel_size=63,
+                                        strides = 32,
+                                        padding = 'SAME',
+                                        name="deconv")
+
+        with tf.name_scope("output") : 
+            self.logits  = tf.reshape(self.deconv,shape=(-1,N_CLASSES),name="logits")
+            self.y_proba = tf.nn.softmax(self.logits,name="y_proba")
+
+        with tf.name_scope('loss') : 
+            self.y_flatten = tf.reshape(self.y,shape=[-1])
+            self.cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits,labels=self.y_flatten,name="cross_entropy")
+            self.loss_op = tf.reduce_mean(self.cross_entropy,name='fcn_loss')
+                        
+            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            with tf.control_dependencies(update_ops): 
+                self.optimizer = tf.train.AdamOptimizer(0.00023949513325777832) 
+                # training by optimizing the loss function
+                # increment global_step by 1 after a training step
+                self.training_step =self.optimizer.minimize(self.loss_op,global_step=self.global_step_tensor,name="training_op")
+                
+        with tf.name_scope('eval') : 
+            self.correct = tf.nn.in_top_k(self.logits,self.y_flatten,1)
+            self.accuracy = tf.reduce_mean(tf.cast(self.correct,tf.float32))
+
         
     def init_saver(self):
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
@@ -65,7 +119,12 @@ class FcnAlexnetModel(BaseModel):
         if self.model is None : 
             print("You need to create a model first")
         self.model.summary()
+
         
+
+        
+            
+    
   
 
         

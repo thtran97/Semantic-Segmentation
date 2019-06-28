@@ -17,7 +17,7 @@ class ExampleTrainer(BaseTrain):
             accs.append(acc)
         loss = np.mean(losses)
         acc = np.mean(accs)
-
+        
         cur_it = self.model.global_step_tensor.eval(self.sess)
         summaries_dict = {
             'loss': loss,

@@ -77,7 +77,7 @@ class KittyRoadLoader(DataLoader):
         
         # Read the test data images and their masks
         self.test_data = self.all_images[200:300]
-        self.test_mask = self.all_images[200:300]
+        self.test_mask = self.all_masks[200:300]
         
     def read_data(self,data_path):
         image_paths = glob(os.path.join(data_path,'training','image_2','*.png'))
