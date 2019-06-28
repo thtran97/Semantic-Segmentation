@@ -123,15 +123,17 @@ class FcnAlexnetModel(BaseModel):
 #             print("You need to create a model first")
 #         self.model.summary()
 
-    def predict(self,sess,im_input,im_output=None) :
-        Z = sess.run(self.y_proba,feed_dict={self.X : [im_input],self.is_training:False})
-        segmentation = np.argmax(Z,axis=1).reshape(self.height,self.width,1)
-        mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
-        mask = scipy.misc.toimage(mask, mode="RGBA")
-        street_im = scipy.misc.toimage(im_input)
-        street_im.paste(mask, box=None, mask=mask)
-        plt.imshow(street_im)
-        plt.show()  
+    def predict(self,im_input,im_output=None) :
+        with tf.Session() as sess :
+            self.load(sess)
+            Z = sess.run(self.y_proba,feed_dict={self.X : [im_input],self.is_training:False})
+            segmentation = np.argmax(Z,axis=1).reshape(self.height,self.width,1)
+            mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
+            mask = scipy.misc.toimage(mask, mode="RGBA")
+            street_im = scipy.misc.toimage(im_input)
+            street_im.paste(mask, box=None, mask=mask)
+            plt.imshow(street_im)
+            plt.show()  
 
         
             
