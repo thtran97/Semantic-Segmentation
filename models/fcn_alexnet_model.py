@@ -104,7 +104,7 @@ class FcnAlexnetModel(BaseModel):
                         
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops): 
-                self.optimizer = tf.train.AdamOptimizer(0.00023949513325777832) 
+                self.optimizer = tf.train.AdamOptimizer(self.config.learning_rate) 
                 # training by optimizing the loss function
                 # increment global_step by 1 after a training step
                 self.training_step =self.optimizer.minimize(self.loss_op,global_step=self.global_step_tensor,name="training_op")

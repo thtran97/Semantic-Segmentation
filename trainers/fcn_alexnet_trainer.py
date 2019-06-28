@@ -24,14 +24,17 @@ class FcnAlexnetTrainer(BaseTrain):
 
         # take the step number to write summary
         cur_it = self.model.global_step_tensor.eval(self.sess)
-        summaries_dict ={
+        batch_summaries_dict ={
             'batch_loss' : batch_loss,
             'batch_accuracy' : batch_acc,
+        }        
+        test_summaries_dict ={
             'test_loss' : test_loss,
             'test_accuracy' : test_acc,
         }
-        self.logger.summarize(cur_it, summaries_dict=summaries_dict)
-        
+        self.logger.summarize(cur_it, summarizer="train", summaries_dict=batch_summaries_dict)
+        self.logger.summarize(cur_it, summarizer="test", summaries_dict=test_summaries_dict)
+
         # save the model after each epoch
         self.model.save(self.sess)
         
