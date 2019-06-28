@@ -58,5 +58,4 @@ class FcnAlexnetTrainer(BaseTrain):
         print("Last test accuracy : ",acc)
         return loss,acc
     
-
         

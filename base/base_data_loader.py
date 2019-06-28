@@ -77,7 +77,7 @@ class DataLoader(object):
 
         raise NotImplementedError
         
-    def shuffle_batch(self,size):
+    def shuffle_batch(self,batch_size):
 
         raise NotImplementedError
         

@@ -1,6 +1,9 @@
 from base.base_model import BaseModel
 import tensorflow as tf
 from tensorflow.keras import layers,losses,models
+import scipy
+import numpy as np
+import matplotlib.pyplot as plt
 
 CHANNELS = 3
 N_CLASSES = 2
@@ -12,10 +15,10 @@ class FcnAlexnetModel(BaseModel):
         
     def build_model(self):
         self.is_training = tf.placeholder(tf.bool)
-        [height,width] = self.config.image_size
+        [self.height,self.width] = self.config.image_size
         with tf.name_scope("inputs") : 
-            self.X = tf.placeholder(tf.float32,shape=(None,height,width,CHANNELS),name="X")
-            self.y = tf.placeholder(tf.int32,shape=(None,height,width),name="y")
+            self.X = tf.placeholder(tf.float32,shape=(None,self.height,self.width,CHANNELS),name="X")
+            self.y = tf.placeholder(tf.int32,shape=(None,self.height,self.width),name="y")
         
         # FCN-Alexnet architecture
         self.conv0 = tf.layers.conv2d(self.X,filters=96,
@@ -115,12 +118,20 @@ class FcnAlexnetModel(BaseModel):
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
     
-    def summary(self):
-        if self.model is None : 
-            print("You need to create a model first")
-        self.model.summary()
+#     def summary(self):
+#         if self.model is None : 
+#             print("You need to create a model first")
+#         self.model.summary()
 
-        
+    def predict(self,sess,im_input,im_output=None) :
+        Z = sess.run(self.y_proba,feed_dict={self.X : [im_input],self.is_training:False})
+        segmentation = np.argmax(Z,axis=1).reshape(self.height,self.width,1)
+        mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
+        mask = scipy.misc.toimage(mask, mode="RGBA")
+        street_im = scipy.misc.toimage(im_input)
+        street_im.paste(mask, box=None, mask=mask)
+        plt.imshow(street_im)
+        plt.show()  
 
         
             
