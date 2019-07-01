@@ -4,6 +4,7 @@ from tensorflow.keras import layers,losses,models
 import scipy
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 CHANNELS = 3
 N_CLASSES = 2
@@ -12,7 +13,18 @@ N_CLASSES = 2
 class FcnAlexnetModel(BaseModel):
     def __init(self,config):
         super(FcnAlexnetModel,self).__init__(config)
-        
+    
+            
+    def init_saver(self):
+        # here you initialize the tensorflow saver that will be used in saving the checkpoints.
+        self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
+    
+#     def summary(self):
+#         if self.model is None : 
+#             print("You need to create a model first")
+#         self.model.summary()
+
+    
     def build_model(self):
         self.is_training = tf.placeholder(tf.bool)
         [self.height,self.width] = self.config.image_size
@@ -113,27 +125,17 @@ class FcnAlexnetModel(BaseModel):
             self.correct = tf.nn.in_top_k(self.logits,self.y_flatten,1)
             self.accuracy = tf.reduce_mean(tf.cast(self.correct,tf.float32))
 
-        
-    def init_saver(self):
-        # here you initialize the tensorflow saver that will be used in saving the checkpoints.
-        self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
     
-#     def summary(self):
-#         if self.model is None : 
-#             print("You need to create a model first")
-#         self.model.summary()
-
-    def predict(self,im_input,im_output=None) :
-        with tf.Session() as sess :
-            self.load(sess)
-            Z = sess.run(self.y_proba,feed_dict={self.X : [im_input],self.is_training:False})
-            segmentation = np.argmax(Z,axis=1).reshape(self.height,self.width,1)
-            mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
-            mask = scipy.misc.toimage(mask, mode="RGBA")
-            street_im = scipy.misc.toimage(im_input)
-            street_im.paste(mask, box=None, mask=mask)
-            plt.imshow(street_im)
-            plt.show()  
+#     def predict(self,sess,im_input,im_output=None) :
+#         self.sess = sess
+#         Z = self.sess.run(self.y_proba,feed_dict={self.X : [im_input],self.is_training:False})
+#         segmentation = np.argmax(Z,axis=1).reshape(self.height,self.width,1)
+#         mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
+#         mask = scipy.misc.toimage(mask, mode="RGBA")
+#         street_im = scipy.misc.toimage(im_input)
+#         street_im.paste(mask, box=None, mask=mask)
+#         plt.imshow(street_im)
+#         plt.show()  
 
         
             

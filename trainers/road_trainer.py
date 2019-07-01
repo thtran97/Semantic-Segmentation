@@ -1,10 +1,12 @@
 from base.base_train import BaseTrain
 from tqdm import tqdm
 import numpy as np
+import matplotlib.pyplot as plt
+import scipy
 
-class FcnAlexnetTrainer(BaseTrain):
+class RoadTrainer(BaseTrain):
     def __init__(self, sess, model, data, config,logger):
-        super(FcnAlexnetTrainer, self).__init__(sess, model, data, config,logger)
+        super(RoadTrainer, self).__init__(sess, model, data, config,logger)
 
     
     def train_epoch(self):
@@ -17,8 +19,8 @@ class FcnAlexnetTrainer(BaseTrain):
         # compute the loss and accuracy of epoch
         batch_loss = np.mean(losses)
         batch_acc = np.mean(accs)
-        print(" Last epoch loss : ",batch_loss)
-        print(" Last epoch accuracy :", batch_acc)
+        print("-->Last epoch loss : ",batch_loss)
+        print("-->Last epoch accuracy :", batch_acc)
         # compute the loss and accruracy on test
         test_loss,test_acc = self.evaluate_model()
 
@@ -57,8 +59,18 @@ class FcnAlexnetTrainer(BaseTrain):
                            self.model.loss_op,
                            self.model.accuracy],
                            feed_dict = {self.model.X : self.data.test_data, self.model.y : self.data.test_mask, self.model.is_training : False })
-        print("Last test loss :",loss)
-        print("Last test accuracy : ",acc)
+        print("-->Last test loss :",loss)
+        print("-->Last test accuracy : ",acc)
         return loss,acc
-    
+   
+    def predict(self,im_input,im_output=None) :
+        Z = self.sess.run(self.model.y_proba,feed_dict={self.model.X : [im_input],self.model.is_training:False})
+        segmentation = np.argmax(Z,axis=1).reshape(self.model.height,self.model.width,1)
+        mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
+        mask = scipy.misc.toimage(mask, mode="RGBA")
+        street_im = scipy.misc.toimage(im_input)
+        street_im.paste(mask, box=None, mask=mask)
+        plt.imshow(street_im)
+        plt.show()  
+ 
         
