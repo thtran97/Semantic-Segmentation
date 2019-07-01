@@ -1,4 +1,4 @@
-# Sematic-Segmentation Study
+# Sematic Segmentation Study
 
 
 
