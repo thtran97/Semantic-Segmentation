@@ -1,5 +1,5 @@
 {
-  "exp_name": "fcn_alexnet_kittyroad",
+  "exp_name": "Unet_kittyroad",
   "num_epochs": 10,
   "num_iter_per_epoch": 100,
   "learning_rate": 0.00023949513325777832,

@@ -19,8 +19,8 @@ class RoadTrainer(BaseTrain):
         # compute the loss and accuracy of epoch
         batch_loss = np.mean(losses)
         batch_acc = np.mean(accs)
-        print("-->Last epoch loss : ",batch_loss)
-        print("-->Last epoch accuracy :", batch_acc)
+        print("-->Last epoch loss     : ", batch_loss)
+        print("-->Last epoch accuracy : ", batch_acc)
         # compute the loss and accruracy on test
         test_loss,test_acc = self.evaluate_model()
 
@@ -55,17 +55,16 @@ class RoadTrainer(BaseTrain):
     
     
     def evaluate_model(self):
-        _,loss,acc = self.sess.run([self.model.training_step,
-                           self.model.loss_op,
+        loss,acc = self.sess.run([self.model.loss_op,
                            self.model.accuracy],
                            feed_dict = {self.model.X : self.data.test_data, self.model.y : self.data.test_mask, self.model.is_training : False })
-        print("-->Last test loss :",loss)
+        print("-->Last test loss     : ",loss)
         print("-->Last test accuracy : ",acc)
         return loss,acc
    
     def predict(self,im_input,im_output=None) :
-        Z = self.sess.run(self.model.y_proba,feed_dict={self.model.X : [im_input],self.model.is_training:False})
-        segmentation = np.argmax(Z,axis=1).reshape(self.model.height,self.model.width,1)
+        output_pred = self.sess.run(self.model.output,feed_dict={self.model.X : [im_input],self.model.is_training:False})
+        segmentation = (output_pred>0.5).reshape(self.model.height,self.model.width,1)
         mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
         mask = scipy.misc.toimage(mask, mode="RGBA")
         street_im = scipy.misc.toimage(im_input)

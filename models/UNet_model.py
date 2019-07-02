@@ -20,7 +20,7 @@ def dice_loss(y_true, y_pred):
     loss = 1 - dice_coeff(y_true, y_pred)
     return loss
 
-def F_loss(y_true, y_pred):
+def f_loss(y_true, y_pred):
 #     loss = tf.keras.losses.binary_crossentropy(y_true, y_pred) + dice_loss(y_true, y_pred)
     loss = tf.keras.losses.binary_crossentropy(y_true, y_pred)
 #     loss = dice_loss(y_true, y_pred)
@@ -211,32 +211,32 @@ class UNetModel(BaseModel):
                              activation=tf.nn.relu,
                              name="conv9_1")
 
-
         self.output = tf.layers.conv2d(self.conv9_1,filters=1,
                               kernel_size = 1,
                               strides=1,
                               padding = "SAME",
-                              activation = tf.nn.sigmoid,
-                              name = "output")
+                              activation = tf.nn.sigmoid)
 
-        self.output = tf.reshape(self.output,shape = (-1,self.height,self.width))
+        self.output = tf.reshape(self.output,shape = (-1,self.height,self.width),name="output")
 
         with tf.name_scope('train') : 
-        #     loss_op = tf.reduce_mean(tf.keras.losses.binary_crossentropy(y,output),name='fcn_loss')
-            self.loss_op = tf.reduce_mean(f_loss(self.y,self.output),name='fcn_loss')
+#             loss_op = tf.reduce_mean(tf.keras.losses.binary_crossentropy(y,output),name='fcn_loss')
+#             self.loss_op = tf.reduce_mean(f_loss(self.y,self.output),name='fcn_loss')
+            self.cross_entropy = tf.keras.losses.binary_crossentropy(tf.cast(self.y,tf.float32),self.output)           
+            self.loss_op = tf.reduce_mean(self.cross_entropy,name='fcn_loss')
             
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops): 
-                self.optimizer = tf.train.AdamOptimizer()
+                self.optimizer = tf.train.AdamOptimizer(self.config.learning_rate)
                 # training by optimizing the loss function
                 # increment global_step by 1 after a training step
-            self.training_step =self.optimizer.minimize(self.loss_op,global_step=self.global_step_tensor,name="training_op")
+                self.training_step =self.optimizer.minimize(self.loss_op,global_step=self.global_step_tensor,name="training_op")
 
         with tf.name_scope('eval') : 
-        #     correct = tf.nn.in_top_k(logits,y_flatten,1)
-        #     accuracy = tf.reduce_mean(tf.cast(correct,tf.float32))
-            self.accuracy = tf.reduce_mean(tf.keras.metrics.categorical_accuracy(self.y,self.output))
-
+#             correct = tf.nn.in_top_k(logits,y_flatten,1)
+#             accuracy = tf.reduce_mean(tf.cast(correct,tf.float32))
+#             self.accuracy = tf.reduce_mean(tf.keras.metrics.categorical_accuracy(self.y,self.output),name="accuracy")
+            self.accuracy = tf.reduce_mean(dice_coeff(self.y,self.output),name="accuracy")
 
 
 
