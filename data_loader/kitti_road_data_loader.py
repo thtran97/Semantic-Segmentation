@@ -1,5 +1,5 @@
 """
-Implement the KirryRoadLoader class by inheriting the DataLoader class
+Implement the KittiRoadLoader class by inheriting the DataLoader class
 Load data frol the Kitty Road dataset and preprocess it...
 ## Reference to : https://github.com/SantoshPattar/ConvNet-OOP
 ## Dataset link  : http://www.cvlibs.net/datasets/kitti/eval_road.php
@@ -47,7 +47,7 @@ def data_augementation(X,y,ax) :
     y = np.concatenate((y,new_y),axis=0)
     return X,y
 
-class KittyRoadLoader(DataLoader):
+class KittiRoadLoader(DataLoader):
     
     def __init__(self,config):
         """
