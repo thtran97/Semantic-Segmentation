@@ -1,0 +1,10 @@
+{
+  "exp_name": "fcn8s_kittiroad",
+  "num_epochs": 2,
+  "num_iter_per_epoch": 100,
+  "learning_rate": 0.00023949513325777832,
+  "batch_size": 2,
+  "max_to_keep":5,
+  "data_path": "C:/Users/TT260256/My Project/NNs/data_road",
+  "image_size" : [320,480]
+}
