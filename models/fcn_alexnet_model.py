@@ -44,7 +44,7 @@ class FcnAlexnetModel(BaseModel):
 #         self.model.summary()
 
     
-    def build_model(self):
+    def build(self):
         self.is_training = tf.placeholder(tf.bool)
         [self.height,self.width] = self.config.image_size
         with tf.name_scope("inputs") : 
