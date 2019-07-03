@@ -4,7 +4,7 @@ from tensorflow.keras import layers,losses,models
 import scipy
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
+
 
 CHANNELS = 3
 N_CLASSES = 2
@@ -151,17 +151,19 @@ class FcnAlexnetModel(BaseModel):
             self.accuracy = tf.reduce_mean(dice_coeff(tf.cast(self.y,tf.float32),self.output),name="accuracy")
 
     
-#     def predict(self,sess,im_input,im_output=None) :
-#         self.sess = sess
-#         Z = self.sess.run(self.y_proba,feed_dict={self.X : [im_input],self.is_training:False})
-#         segmentation = np.argmax(Z,axis=1).reshape(self.height,self.width,1)
-#         mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
-#         mask = scipy.misc.toimage(mask, mode="RGBA")
-#         street_im = scipy.misc.toimage(im_input)
-#         street_im.paste(mask, box=None, mask=mask)
-#         plt.imshow(street_im)
-#         plt.show()  
-
+    def predict(self,sess,im_input,im_output=None) :
+        output_pred = sess.run(self.output,feed_dict={self.X : [im_input],self.is_training:False})
+        segmentation = (output_pred>0.5).reshape(self.height,self.width,1)
+        mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
+        mask = scipy.misc.toimage(mask, mode="RGBA")
+        street_im = scipy.misc.toimage(im_input)
+        street_im.paste(mask, box=None, mask=mask)
+        plt.imshow(street_im)
+        plt.show()  
+        if im_output is not None:
+            acc = sess.run(self.accuracy,feed_dict={self.X : [im_input], self.y : [im_output], self.is_training:False})
+            print("Accuracy : ",acc)
+            return acc
         
             
     

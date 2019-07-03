@@ -1,6 +1,6 @@
 {
-  "exp_name": "Unet_kittiroad",
-  "num_epochs": 10,
+  "exp_name": "unet_kittiroad",
+  "num_epochs": 2,
   "num_iter_per_epoch": 100,
   "learning_rate": 0.00023949513325777832,
   "batch_size": 2,

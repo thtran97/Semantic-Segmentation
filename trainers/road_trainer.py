@@ -62,14 +62,14 @@ class RoadTrainer(BaseTrain):
         print("-->Last test accuracy : ",acc)
         return loss,acc
    
-    def predict(self,im_input,im_output=None) :
-        output_pred = self.sess.run(self.model.output,feed_dict={self.model.X : [im_input],self.model.is_training:False})
-        segmentation = (output_pred>0.5).reshape(self.model.height,self.model.width,1)
-        mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
-        mask = scipy.misc.toimage(mask, mode="RGBA")
-        street_im = scipy.misc.toimage(im_input)
-        street_im.paste(mask, box=None, mask=mask)
-        plt.imshow(street_im)
-        plt.show()  
+     #def predict(self,im_input,im_output=None) :
+#         output_pred = self.sess.run(self.model.output,feed_dict={self.model.X : [im_input],self.model.is_training:False})
+#         segmentation = (output_pred>0.5).reshape(self.model.height,self.model.width,1)
+#         mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
+#         mask = scipy.misc.toimage(mask, mode="RGBA")
+#         street_im = scipy.misc.toimage(im_input)
+#         street_im.paste(mask, box=None, mask=mask)
+#         plt.imshow(street_im)
+#         plt.show()  
  
         
