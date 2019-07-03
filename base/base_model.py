@@ -10,8 +10,8 @@ class BaseModel:
         self.init_cur_epoch()
         # init the saver
         self.init_saver()
-        # build the model
-        self.build_model()
+#         # build the model
+#         self.build()
         
     # save function that saves the checkpoint in the path defined in the config file
     def save(self, sess):
@@ -44,7 +44,7 @@ class BaseModel:
         # self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
         self.saver = tf.train.Saver()
 
-    def build_model(self):
+    def build(self):
         raise NotImplementedError
 
      
