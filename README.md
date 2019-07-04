@@ -106,8 +106,13 @@ trainer = RoadTrainer(sess,model,data,config,logger)
 model.load(sess)
 ```
 
-* Finally, train your model by the trainer
+* Train your model by the trainer
 
 ```python
 trainer.train()
+```
+
+* Close the session when you finish 
+```python
+sess.close()
 ```
