@@ -27,7 +27,7 @@ The template is forked from [TensorFlow Project Template](https://github.com/MrG
 
 * Create a configuration file .json 
 
-`
+```
 "exp_name" : Folder that you want save the checkpoints and summaries for tensorboard
 
 "num_epochs" : Number of epochs for training, pay attention to overfitting !
@@ -48,67 +48,66 @@ learning rate ?
 "loss" : Name of loss function you want to use
 
 "accuracy" : Name of accuracy function you want to use
-`
+```
 
 * Read the config file
 
-`
+```python
 from utils.config import process_config 
 
 config = process_config("PATH/TO/CONFIG/FILE")
-`
+```
 
 * Create a session 
 
-`
+```python
 from tensorflow as tf
 
 sess = tf.Session()
-`
+```
 
 * Create your data generator
 
-`
+```python
 from data_loader.kitti_road_data_loader import KittyRoadLoader
 
 data = KittyRoadLoader(config)
-`
+```
 
 * Create and build an instance of model
 
-`
+```python
 from models.fcn_alexnet_model import FcnAlexnetModel
 
 model  = FcnAlexnetModel(config)
 
 model.build()
-`
+```
 
 * Create an instance of logger for saving checkpoints and summaries.
 
-`
+```python
 from utils.logger import Logger 
 
 logger = Logger(sess,config)
-`
+```
 
 * Create an trainer for training the created model with your above dataset
 
-`
+```python
 from trainers.road_trainer import RoadTrainer
 
 trainer = RoadTrainer(sess,model,data,config,logger)
-`
+```
 
 * Load your model if exists
 
-`
+```python
 model.load(sess)
-`
+```
 
 * Finally, train your model by the trainer
 
-`
+```python
 trainer.train()
-`
-
+```
