@@ -3,10 +3,11 @@ from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy
+import tensorflow as tf
 
 class RoadTrainer(BaseTrain):
     def __init__(self, sess, model, data, config,logger):
-        super(RoadTrainer, self).__init__(sess, model, data, config,logger)
+        super(RoadTrainer, self).__init__(sess, model, data, config, logger)
 
     
     def train_epoch(self):
@@ -37,18 +38,20 @@ class RoadTrainer(BaseTrain):
         self.logger.summarize(cur_it, summarizer="train", summaries_dict=batch_summaries_dict)
         self.logger.summarize(cur_it, summarizer="test", summaries_dict=test_summaries_dict)
         
-        if test_loss < self.best_loss :   
+        # Early Stopping Algo
+        if test_loss < self.best_loss.eval(self.sess) :   
             # save the model after each epoch
             self.model.save(self.sess)
-            self.best_loss = test_loss
+            self.change_loss =  tf.assign(self.best_loss, test_loss)
+            self.sess.run(self.change_loss)
             self.checks_without_progress = 0
-            print("[BEST LOST : {}]".format(self.best_loss))
+            print("[BEST LOST : {}]".format(self.best_loss.eval(self.sess)))
         else:
             self.checks_without_progress += 1
             if self.checks_without_progress > self.max_checks_without_progress : 
                 self.stop = True
                 print("Early Stopping !")
-                break
+
         
     def train_step(self):
         
@@ -68,8 +71,8 @@ class RoadTrainer(BaseTrain):
         loss,acc = self.sess.run([self.model.loss_op,
                            self.model.accuracy],
                            feed_dict = {self.model.X : self.data.test_data, self.model.y : self.data.test_mask, self.model.is_training : False })
-        print("-->Last test loss     : ",loss)
-        print("-->Last test accuracy : ",acc)
+        print("-->Last test loss      : ",loss)
+        print("-->Last test accuracy  : ",acc)
         return loss,acc
    
      #def predict(self,im_input,im_output=None) :

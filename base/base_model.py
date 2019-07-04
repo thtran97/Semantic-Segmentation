@@ -10,6 +10,7 @@ class BaseModel:
         self.init_cur_epoch()
         # init the saver
         self.init_saver()
+
 #         # build the model
 #         self.build()
         

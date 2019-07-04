@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+import numpy as np
 
 class BaseTrain:
     def __init__(self, sess, model, data, config, logger):
@@ -8,15 +8,18 @@ class BaseTrain:
         self.config = config
         self.sess = sess
         self.data = data
+
+        # variable for early stopping
+        self.max_checks_without_progress = 5
+        self.best_loss = tf.Variable(np.infty, trainable=False, name='global_step')
+        
+        # run init
         self.init = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
         self.sess.run(self.init)
-        # variable for early stopping
-        self.max_checks_without_progress = 2
-        self.checks_without_progress = 0
-        self.best_loss = np.infty
-        self.stop = False
         
     def train(self):
+        self.checks_without_progress = 0
+        self.stop = False
         num_epochs = self.config.num_epochs + self.model.cur_epoch_tensor.eval(self.sess)
         for cur_epoch in range(self.model.cur_epoch_tensor.eval(self.sess), num_epochs, 1):
             if self.stop : 
