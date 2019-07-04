@@ -123,7 +123,8 @@ class FcnAlexnetModel(BaseModel):
         with tf.name_scope("eval") : 
             self.accuracy = tf.reduce_mean(um.f_accuracy(tf.cast(self.y,tf.float32),self.output,self.config.accuracy),name="accuracy")
 
-    
+        print("Model built successfully.")
+               
     def predict(self,sess,im_input,im_output=None) :
         output_pred = sess.run(self.output,feed_dict={self.X : [im_input],self.is_training:False})
         segmentation = (output_pred>0.5).reshape(self.height,self.width,1)

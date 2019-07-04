@@ -68,16 +68,20 @@ class KittiRoadLoader(DataLoader):
         print("Size of masks collection : ",self.all_masks.shape)
         
         # Read the training data images and their masks
-        self.train_data = self.all_images[0:200]
-        self.train_mask = self.all_masks[0:200]
+        self.train_data = self.all_images[:200]
+        self.train_mask = self.all_masks[:200]
         
         # Read the valid data images and their masks
-#         self.valid_data = 
-#         self.valid_mask =
+        self.valid_data = self.all_images[200:300] 
+        self.valid_mask = self.all_masks[200:300] 
         
         # Read the test data images and their masks
-        self.test_data = self.all_images[200:300]
-        self.test_mask = self.all_masks[200:300]
+        self.test_data = self.all_images[300:]
+        self.test_mask = self.all_masks[300:]
+        
+        # free some unused vars
+        self.all_images = []
+        self.all_masks = []
         
     def read_data(self,data_path):
         image_paths = glob(os.path.join(data_path,'training','image_2','*.png'))
@@ -97,11 +101,11 @@ class KittiRoadLoader(DataLoader):
             plt.imshow(self.train_data[index])
             plt.subplot(1,2,2)
             plt.imshow(self.train_mask[index])
-#         elif(which_data == "valid_data"):
-#             plt.subplot(1,2,1)
-#             plt.imshow(self.valid_data[index])
-#             plt.subplot(1,2,2)
-#             plt.imshow(self.valid_mask[index])
+        elif(which_data == "valid_data"):
+            plt.subplot(1,2,1)
+            plt.imshow(self.valid_data[index])
+            plt.subplot(1,2,2)
+            plt.imshow(self.valid_mask[index])
         elif(which_data == "test_data"):
             plt.subplot(1,2,1)
             plt.imshow(self.test_data[index])
@@ -115,11 +119,12 @@ class KittiRoadLoader(DataLoader):
     def get_data_element(self,which_data,index):
         if(which_data == "train_data"):
             return self.train_data[index],self.train_mask[index]
-#         elif(which_data == "valid_data"):
+        elif(which_data == "valid_data"):
+            return self.valid_data[index],self.valid_mask[index]
         elif(which_data == "test_data"):
             return self.test_data[index],self.test_mask[index]
-        elif(which_data == "all_data"):
-            return self.all_images[index],self.all_masks[index]
+#         elif(which_data == "all_data"):
+#             return self.all_images[index],self.all_masks[index]
         else: 
             print("[Error from display_data_element] : which_data parameter is invalid ! It can be train_data,test_data or all_data.")
             
@@ -144,7 +149,13 @@ class KittiRoadLoader(DataLoader):
         for batch_idx in np.array_split(rnd_idx, n_batches):
             X_batch, y_batch = self.train_data[batch_idx], self.train_mask[batch_idx]
             yield X_batch, y_batch
-        
+            
+    def shuffle_batch_with(self,X_train,y_train,batch_size):
+        rnd_idx = np.random.permutation(len(X_train))
+        n_batches = len(X_train) // batch_size
+        for batch_idx in np.array_split(rnd_idx, n_batches):
+            X_batch, y_batch = X_train[batch_idx], y_train[batch_idx]
+            yield X_batch, y_batch
         
             
     

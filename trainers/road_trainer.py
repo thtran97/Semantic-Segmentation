@@ -70,7 +70,7 @@ class RoadTrainer(BaseTrain):
     def evaluate_model(self):
         loss,acc = self.sess.run([self.model.loss_op,
                            self.model.accuracy],
-                           feed_dict = {self.model.X : self.data.test_data, self.model.y : self.data.test_mask, self.model.is_training : False })
+                           feed_dict = {self.model.X : self.data.valid_data, self.model.y : self.data.valid_mask, self.model.is_training : False })
         print("-->Last test loss      : ",loss)
         print("-->Last test accuracy  : ",acc)
         return loss,acc

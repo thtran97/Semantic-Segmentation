@@ -5,30 +5,9 @@ import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 import sys,os 
+import utils.losses as ul  
+import utils.metrics as um
 
-
-
-CHANNELS = 3
-N_CLASSES = 2
-
-def dice_coeff(y_true,y_pred) : 
-    smooth = 1
-    # flatten 
-    y_true_f = tf.reshape(y_true,[-1])
-    y_pred_f = tf.reshape(y_pred,[-1])
-    intersection = tf.reduce_sum(y_true_f * y_pred_f)
-    score = (2. * intersection + smooth) / (tf.reduce_sum(y_true_f) + tf.reduce_sum(y_pred_f) + smooth)
-    return score
-
-def dice_loss(y_true, y_pred):
-    loss = 1 - dice_coeff(y_true, y_pred)
-    return loss
-
-def f_loss(y_true, y_pred):
-#     loss = tf.keras.losses.binary_crossentropy(y_true, y_pred) + dice_loss(y_true, y_pred)
-    loss = tf.keras.losses.binary_crossentropy(y_true, y_pred)
-#     loss = dice_loss(y_true, y_pred)
-    return loss
 
 
 class Fcn8sModel(BaseModel):
@@ -47,11 +26,12 @@ class Fcn8sModel(BaseModel):
 
     
     def build(self,vgg16_npy_path=None):
-
+        
         self.is_training = tf.placeholder(tf.bool)
-        [self.height,self.width] = self.config.image_size
+        [self.height,self.width,self.channels] = self.config.image_size
+        self.n_classes = 2
         with tf.name_scope("inputs") : 
-            self.X = tf.placeholder(tf.float32,shape=(None,self.height,self.width,CHANNELS),name="X")
+            self.X = tf.placeholder(tf.float32,shape=(None,self.height,self.width,self.channels),name="X")
             self.y = tf.placeholder(tf.int32,shape=(None,self.height,self.width),name="y")
         
 #         if vgg16_npy_path is None:
@@ -150,8 +130,6 @@ class Fcn8sModel(BaseModel):
             self.conv5_3 = self._conv_layer(self.conv5_2, "conv5_3")
             self.pool5 = self._max_pool(self.conv5_3, 'pool5')
             
-#             self.fc6 = self._conv_layer(sefl.pool5,"fc6")
-#             self.fc7 = self._conv_layer(sefl.fc6,"fc6")
 
         self.fc6 = tf.layers.conv2d(self.pool5,filters=4096,
                                  kernel_size=7,
@@ -171,52 +149,47 @@ class Fcn8sModel(BaseModel):
 
         self.drop7 = tf.layers.dropout(self.fc7,rate=0.5,name='dropout7')
 
-        self.conv7_1x1 = tf.layers.conv2d(self.drop7, N_CLASSES, kernel_size=1, 
+        self.conv7_1x1 = tf.layers.conv2d(self.drop7, self.n_classes, kernel_size=1, 
                                          padding='same', 
                                          name="conv7_1x1")
 
-        self.deconv7 =  tf.layers.conv2d_transpose(self.conv7_1x1, N_CLASSES, 
+        self.deconv7 =  tf.layers.conv2d_transpose(self.conv7_1x1, self.n_classes, 
                                                    kernel_size=4, 
                                                    strides=2, 
                                                    padding='same',
                                                    name = "deconv7")
 
-        self.pool4_1x1 = tf.layers.conv2d(self.pool4, N_CLASSES, kernel_size=1, 
+        self.pool4_1x1 = tf.layers.conv2d(self.pool4, self.n_classes, kernel_size=1, 
                                          padding='same', 
                                          name="pool4_1x1")
 
         self.fuse1 = tf.add(self.deconv7,self.pool4_1x1, name = "fuse1")
 
-        self.deconv_fuse1 = tf.layers.conv2d_transpose(self.fuse1, N_CLASSES, 
+        self.deconv_fuse1 = tf.layers.conv2d_transpose(self.fuse1, self.n_classes, 
                                                        kernel_size=4, 
                                                        strides=2, 
                                                        padding='same',
                                                        name = "deconv_fuse1")
 
-        self.pool3_1x1 = tf.layers.conv2d(self.pool3, N_CLASSES, kernel_size=1, 
+        self.pool3_1x1 = tf.layers.conv2d(self.pool3, self.n_classes, kernel_size=1, 
                                          padding='same', 
                                          name="pool3_1x1")
 
         self.fuse2 = tf.add(self.deconv_fuse1,self.pool3_1x1,name="fuse2")
 
-        self.logits = tf.layers.conv2d_transpose(self.fuse2,N_CLASSES,
+        self.logits = tf.layers.conv2d_transpose(self.fuse2,self.n_classes,
                                                  kernel_size=16,
                                                  strides=8,
                                                  padding="same",
                                                  name = "logits")
 
         with tf.name_scope("outputs") : 
-#             self.logits  = tf.reshape(self.deconv,shape=(-1,N_CLASSES),name="logits")
             self.y_proba = tf.nn.sigmoid(self.logits,name="y_proba")
-#             self.output = np.argmax(self.logits,axis=1)
-#             self.output = tf.reshape(self.output,shape=(-1,self.height,self.width),name='output')
             self.output = tf.reduce_max(self.y_proba,axis=3,name='output')
 
         with tf.name_scope('loss') : 
-#             self.y_flatten = tf.reshape(self.y,shape=[-1])
-#             self.cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits,labels=self.y_flatten,name="cross_entropy")
-            self.cross_entropy = tf.keras.losses.binary_crossentropy(tf.cast(self.y,tf.float32),self.output)
-            self.loss_op = tf.reduce_mean(self.cross_entropy,name='fcn_loss')
+            self.loss_op = tf.reduce_mean(ul.f_loss(tf.cast(self.y,tf.float32),self.output,self.config.loss),name="fcn_loss")
+             
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             if vgg16_npy_path is not None :
                 scope_name = "fc((.)+)|conv7(.)+|deconv(.)+|pool(.)+|logits"
@@ -231,10 +204,7 @@ class Fcn8sModel(BaseModel):
                 self.training_step =self.optimizer.minimize(self.loss_op,var_list=self.train_vars,global_step=self.global_step_tensor,name="training_op")
                 
         with tf.name_scope('eval') : 
-#             self.correct = tf.nn.in_top_k(self.logits,self.y_flatten,1)
-#             self.accuracy = tf.reduce_mean(tf.cast(self.correct,tf.float32),name="accuracy")
-#             self.accuracy = tf.reduce_mean(tf.keras.metrics.categorical_accuracy(self.y,self.output),name="accuracy")
-            self.accuracy = tf.reduce_mean(dice_coeff(tf.cast(self.y,tf.float32),self.output),name="accuracy")
+            self.accuracy = tf.reduce_mean(um.f_accuracy(tf.cast(self.y,tf.float32),self.output,self.config.accuracy),name="accuracy")
     
         print("Model built successfully.")
         
@@ -256,16 +226,16 @@ class Fcn8sModel(BaseModel):
 
 
     def get_conv_filter(self, name):
-#         return tf.Variable(self.data_dict[name][0], name="filter")
+        return tf.Variable(self.data_dict[name][0], name="filter")
         # use tf.constant() to prevent retraining it accidentally
-        return tf.constant(self.data_dict[name][0], name="filter")
+#         return tf.constant(self.data_dict[name][0], name="filter")
 
 
 
     def get_bias(self, name):
-#         return tf.Variable(self.data_dict[name][1], name="biases")
+        return tf.Variable(self.data_dict[name][1], name="biases")
         # use tf.constant() to prevent retraining it accidentally
-        return tf.constant(self.data_dict[name][1], name="biases")
+#         return tf.constant(self.data_dict[name][1], name="biases")
 
         
    
