@@ -11,41 +11,13 @@ from glob import glob
 import matplotlib.pyplot as plt
 from skimage import io
 from sklearn.utils import shuffle
+import utils.image_processing as img_process
 
 COLORMAP = [[255,0,0],[255,0,255]]
 CLASSES = ['background','road']
 
-def build_colormap2label() : 
-    """Build a RGB color to label mapping for segmentation"""
-    colormap2label = np.zeros(256**3)
-    for i, colormap in enumerate(COLORMAP) : 
-        # define the index of this color in map
-        index  = colormap[0]*256**2 + colormap[1]*256 + colormap[2]
-        # define the label of this color
-        colormap2label[index] = i     
-    return colormap2label
 
-def label_indices(colormap,colormap2label) : 
-    """Map a colormap to label"""
-    colormap = colormap.astype('int32')
-    idx = colormap [:,:,0]*256**2 + colormap[:,:,1]*256 + colormap[:,:,2]
-    return colormap2label[idx]
 
-def filter_images(imgs,crop_size) : 
-    res = ( [img[:crop_size[0],0:crop_size[1]] for img in imgs if (img.shape[0] >= crop_size[0] and img.shape[1] >= crop_size[1])]
-            + [img[:crop_size[0],200:200+crop_size[1]] for img in imgs if (img.shape[0] >= crop_size[0] and img.shape[1] >= crop_size[1])] 
-            + [img[:crop_size[0],400:400+crop_size[1]] for img in imgs if (img.shape[0] >= crop_size[0] and img.shape[1] >= crop_size[1])]
-            + [img[:crop_size[0],img.shape[1]-crop_size[1]:img.shape[1]] for img in imgs if (img.shape[0] >= crop_size[0] and img.shape[1] >= crop_size[1])])
-    return res
-
-def data_augementation(X,y,ax) :
-    new_X,new_y = [],[]
-    for i in range(len(X)) : 
-        new_X.append(np.flip(X[i],axis=ax))
-        new_y.append(np.flip(y[i],axis=ax))
-    X = np.concatenate((X,new_X),axis=0)
-    y = np.concatenate((y,new_y),axis=0)
-    return X,y
 
 class KittiRoadLoader(DataLoader):
     
@@ -80,15 +52,14 @@ class KittiRoadLoader(DataLoader):
         self.test_mask = self.all_masks[300:]
         
         # free some unused vars
-        self.all_images = []
-        self.all_masks = []
+        self.all_images, self.all_masks, self.all_raw_images, self.all_raw_masks, self.all_raw_labels = [],[],[],[],[]
         
     def read_data(self,data_path):
         image_paths = glob(os.path.join(data_path,'training','image_2','*.png'))
         label_paths = glob(os.path.join(data_path,'training','gt_image_2','*_road_*.png'))
         images = [io.imread(image_path) for image_path in image_paths]
         labels = [io.imread(label_path) for label_path in label_paths]  
-        masks = [label_indices(item,build_colormap2label()) for item in labels]
+        masks = [img_process.label_indices(item,img_process.build_colormap2label(COLORMAP)) for item in labels]
         print("Size of all raw images : ", len(images), "samples with size ",images[0].shape)
         print("Size of all raw labels  : ", len(labels), "samples with size ",labels[0].shape)
         print("Size of all raw masks  : ", len(masks), "samples with size ",masks[0].shape)
@@ -130,11 +101,14 @@ class KittiRoadLoader(DataLoader):
             
     def preprocess_data(self):
         # export some images with the input size by sliding from the raw images 
-        self.all_images = filter_images(self.all_raw_images,self.config.image_size)
-        self.all_masks  = filter_images(self.all_raw_masks ,self.config.image_size)
-
+        self.all_images = [img_process.crop_image(img,0,0,self.config.image_size) for img in self.all_raw_images]
+        self.all_masks = [img_process.crop_image(img,0,0,self.config.image_size) for img in self.all_raw_masks]
+    
         # data augementation by flipping 
-        self.all_images,self.all_masks = data_augementation(self.all_images,self.all_masks,1)
+        new_images = [np.flip(img,axis=1) for img in self.all_images]
+        self.all_images = np.concatenate((self.all_images,new_images),axis=0)
+        new_masks = [np.flip(img,axis=1) for img in self.all_masks]
+        self.all_masks = np.concatenate((self.all_masks,new_masks),axis=0)
         
         # shuffle
         self.all_images,self.all_masks = shuffle(self.all_images,self.all_masks)
