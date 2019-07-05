@@ -9,7 +9,6 @@ import utils.losses as ul
 import utils.metrics as um
 
 
-
 class Fcn8sModel(BaseModel):
     def __init(self,config):
         super(Fcn8sModel,self).__init__(config)

@@ -11,11 +11,19 @@ class RoadCacheTrainer(BaseTrain):
 
     def train(self):
         print("Train with cache layer")
-
-        self.hidden_cache = self.sess.run(self.model.pool5,feed_dict={self.model.X : self.data.train_data,self.model.is_training:False})
+        """
+        This method requires a large memory ...
+        This work is not finished yet !
+        """
+        self.X_hidden = []
+        for i in tqdm(range(len(self.data.train_data))) : 
+            X_batch = self.data.train_data[0]
+            hidden_batch = self.sess.run(self.model.pool5,feed_dict={self.model.X : [X_batch], self.model.is_training:False})
+            self.X_hidden.append(hidden_batch) 
 #         self.hidden_cache_test = self.sess.run(self.model.pool5,feed_dict={self.model.X : self.data.valid_data,self.model.is_training:False})
         
         print("Export successfuly cache features")
+        print(len(self.X_hidden))
         
 #         self.checks_without_progress = 0
 #         self.stop = False
@@ -73,9 +81,9 @@ class RoadCacheTrainer(BaseTrain):
         
     def train_step(self):
         
-        X_batch,y_batch = next(self.data.shuffle_batch_with(self.hidden_cache,self.data.train_mask,self.config.batch_size))
+        X_hidden_batch,y_batch = next(self.data.shuffle_batch_with(self.X_hidden,self.data.train_mask,self.config.batch_size))
         
-        feed_dict = {self.model.pool5 : X_batch, self.model.y : y_batch, self.model.is_training : True}
+        feed_dict = {self.model.pool5 : X_hidden_batch, self.model.y : y_batch, self.model.is_training : True}
         
         _,loss,acc = self.sess.run([self.model.training_step,
                                    self.model.loss_op,
@@ -93,14 +101,6 @@ class RoadCacheTrainer(BaseTrain):
         print("-->Last test accuracy  : ",acc)
         return loss,acc
    
-     #def predict(self,im_input,im_output=None) :
-#         output_pred = self.sess.run(self.model.output,feed_dict={self.model.X : [im_input],self.model.is_training:False})
-#         segmentation = (output_pred>0.5).reshape(self.model.height,self.model.width,1)
-#         mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
-#         mask = scipy.misc.toimage(mask, mode="RGBA")
-#         street_im = scipy.misc.toimage(im_input)
-#         street_im.paste(mask, box=None, mask=mask)
-#         plt.imshow(street_im)
-#         plt.show()  
+  
  
         
