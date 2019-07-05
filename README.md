@@ -14,7 +14,7 @@ The template is forked from [TensorFlow Project Template](https://github.com/MrG
 
 
 
-## Release
+## Releases
 
 
 
