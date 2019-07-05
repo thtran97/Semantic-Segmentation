@@ -112,7 +112,7 @@ sess.close()
 
 * [Version 1.0](https://github.com/kuro10/Sematic-Segmentation/tree/6c3bab3126619621b238895e1f9a6f11563874cf) : The first version of this project is well done for training a FCN-Alexnet model with Kitti Road Dataset. However, it is quite difficult to restore this model for a prediction. So these constraints will be optimized in the following update. 
 
-* [Version 1.1](https://github.com/kuro10/Semantic-Segmentation/tree/928f7b5b16fff1d7502bfe365353dd5c761abffe) : This version is the implementation of FCN-Alexnet, U-Net and FCN-8s (based on VGG16-Net), training with Kitti Road Dataset. Also, transfer learning and fine tuning are applied when using FCN-8s (restore weights from file [vgg16.npy](https://github.com/machrisaa/tensorflow-vgg), another solution that is using the checkpoint [vgg_16.ckpt](https://github.com/tensorflow/models/tree/master/research/slim) that will be developped in the future). The idea about "caching the frozen layers" is tested but not really work yet, this idea will be also developped in the future.
+* [Version 1.1](https://github.com/kuro10/Semantic-Segmentation/tree/928f7b5b16fff1d7502bfe365353dd5c761abffe) : This version is the implementation of FCN-Alexnet, U-Net and FCN-8s (based on VGG16-Net), training with Kitti Road Dataset. Also, transfer learning and fine tuning are applied when using FCN-8s (restore weights from file [vgg16.npy](https://github.com/machrisaa/tensorflow-vgg), another solution is to use the checkpoint [vgg_16.ckpt](https://github.com/tensorflow/models/tree/master/research/slim) that will be developped in the future). The idea about "caching the frozen layers" is tested but not really work yet, this idea will be also developped in the future.
 
 ## References
 
