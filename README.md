@@ -57,9 +57,9 @@ sess = tf.Session()
 * Create your data generator
 
 ```python
-from data_loader.kitti_road_data_loader import KittyRoadLoader
+from data_loader.kitti_road_data_loader import KittiRoadLoader
 
-data = KittyRoadLoader(config)
+data = KittiRoadLoader(config)
 ```
 
 * Create and build an instance of model
