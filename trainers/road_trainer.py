@@ -37,15 +37,16 @@ class RoadTrainer(BaseTrain):
         }
         self.logger.summarize(cur_it, summarizer="train", summaries_dict=batch_summaries_dict)
         self.logger.summarize(cur_it, summarizer="test", summaries_dict=test_summaries_dict)
-        
+
+
         # Early Stopping Algo
-        if test_loss < self.best_loss.eval(self.sess) :   
+        if test_loss < self.model.best_loss.eval(self.sess) :   
+#             self.change_loss =  tf.assign(self.model.best_loss, test_loss)
+            self.sess.run(self.model.change_loss,feed_dict={self.model.test_loss : test_loss})
+            self.checks_without_progress = 0
+            print("[BEST LOST : {}]".format(self.model.best_loss.eval(self.sess)))
             # save the model after each epoch
             self.model.save(self.sess)
-            self.change_loss =  tf.assign(self.best_loss, test_loss)
-            self.sess.run(self.change_loss)
-            self.checks_without_progress = 0
-            print("[BEST LOST : {}]".format(self.best_loss.eval(self.sess)))
         else:
             self.checks_without_progress += 1
             if self.checks_without_progress > self.max_checks_without_progress : 

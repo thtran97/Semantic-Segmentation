@@ -1,4 +1,6 @@
 import tensorflow as tf
+import numpy as np
+import os
 
 
 class BaseModel:
@@ -10,24 +12,41 @@ class BaseModel:
         self.init_cur_epoch()
         # init the saver
         self.init_saver()
-
-#         # build the model
-#         self.build()
+        # variable for early stopping
+        self.init_best_loss()
+        # init the builder
+#         self.init_builder()
+        
         
     # save function that saves the checkpoint in the path defined in the config file
     def save(self, sess):
         print("Saving model...")
-        self.saver.save(sess, self.config.checkpoint_dir, self.global_step_tensor)
+        save_path=self.saver.save(sess, self.config.checkpoint_dir, self.global_step_tensor)
         print("Model saved")
+
+
+#     def save_final_model(self, sess):
+#         print("Saving final model...")
+#         self.builder.add_meta_graph_and_variables(sess,
+#                                        [tf.saved_model.tag_constants.TRAINING],
+#                                        signature_def_map=None,
+#                                        assets_collection=None)
+#         print("Final model saved")
 
     # load latest checkpoint from the experiment path defined in the config file
     def load(self, sess):
         latest_checkpoint = tf.train.latest_checkpoint(self.config.checkpoint_dir)
         if latest_checkpoint:
-            print("Loading model checkpoint {} ...\n".format(latest_checkpoint))
+            print("Loading model checkpoint {} ...".format(latest_checkpoint))
             self.saver.restore(sess, latest_checkpoint)
             print("Model loaded")
-
+            
+#     def load_final_model(self, sess):
+#         print("Loading final model ")
+#         tf.saved_model.loader.load(sess, [tf.saved_model.tag_constants.TRAINING], self.config.final_model_dir)
+#         print("Final model loaded")
+#         print("[PRE BEST LOST : {}]".format(self.best_loss.eval(sess)))
+          
     # just initialize a tensorflow variable to use it as epoch counter
     def init_cur_epoch(self):
         with tf.variable_scope('cur_epoch'):
@@ -40,11 +59,21 @@ class BaseModel:
         with tf.variable_scope('global_step'):
             self.global_step_tensor = tf.Variable(0, trainable=False, name='global_step')
 
+    def init_best_loss(self):
+        with tf.variable_scope('best_loss'):
+            self.best_loss = tf.Variable(np.infty, trainable=False, name='best_loss')
+            self.test_loss = tf.placeholder(tf.float32)
+            self.change_loss =  tf.assign(self.best_loss, self.test_loss)
+
+
     def init_saver(self):
         # just copy the following line in your child class
         # self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
         self.saver = tf.train.Saver()
-
+    
+#     def init_builder(self):
+#         self.builder = tf.saved_model.builder.SavedModelBuilder(self.config.final_model_dir)
+        
     def build(self):
         raise NotImplementedError
 

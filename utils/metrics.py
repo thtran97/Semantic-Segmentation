@@ -13,5 +13,5 @@ def f_accuracy(y_true,y_pred,acc_name=None):
     if acc_name == "dice_coeff" :
         acc = dice_coeff(y_true,y_pred)
     else :
-        acc = tf.keras.metrics.categorical_accuracy(y_true,y_pred)
+        acc = tf.keras.metrics.binary_accuracy(y_true,y_pred)
     return acc

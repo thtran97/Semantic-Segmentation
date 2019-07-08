@@ -9,15 +9,13 @@ class BaseTrain:
         self.sess = sess
         self.data = data
 
-        # variable for early stopping
-        self.max_checks_without_progress = 5
-        self.best_loss = tf.Variable(np.infty, trainable=False, name='global_step')
-        
         # run init
         self.init = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
         self.sess.run(self.init)
+        print("Variables initialized")
         
     def train(self):
+        self.max_checks_without_progress = 5
         self.checks_without_progress = 0
         self.stop = False
         num_epochs = self.config.num_epochs + self.model.cur_epoch_tensor.eval(self.sess)
@@ -25,11 +23,13 @@ class BaseTrain:
             if self.stop : 
                 break 
             print("Epoch ",cur_epoch)
-            self.train_epoch()
             self.sess.run(self.model.increment_cur_epoch_tensor)
+            self.train_epoch()
+        
+#         self.model.load(self.sess)
+#         self.model.save_final_model(self.sess)
             
-            
-
+           
     def train_epoch(self):
         """
         implement the logic of epoch:
@@ -45,3 +45,5 @@ class BaseTrain:
         - return any metrics you need to summarize
         """
         raise NotImplementedError
+        
+
