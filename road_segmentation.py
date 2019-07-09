@@ -10,7 +10,7 @@ from utils.utils import get_args
 import matplotlib.pyplot as plt
 import os 
 import sys
-sys.path.append('./')
+
 
 def main():
     # capture the config path from the run arguments
@@ -27,7 +27,7 @@ def main():
     sess = tf.Session()
     # create your data generator
     data = KittyRoadLoader(config)
-    
+ 
     # create an instance of the model you want
     model = FcnAlexnetModel(config)
     # create tensorboard logger
