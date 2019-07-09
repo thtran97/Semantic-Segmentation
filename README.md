@@ -9,9 +9,9 @@
 This git is my study on Semantic Segmentation tasks with TensorFlow and Keras 
 
 
-## Instructions
+## How to use in Jupyter Notebook ?
 
-### Training step
+***1. Training step***
 
 * Create a configuration file .json 
 
@@ -46,14 +46,6 @@ from utils.config import process_config
 config = process_config("PATH/TO/CONFIG/FILE")
 ```
 
-* Create a session 
-
-```python
-from tensorflow as tf
-
-sess = tf.Session()
-```
-
 * Create your data generator
 
 ```python
@@ -70,6 +62,19 @@ from models.fcn_alexnet_model import FcnAlexnetModel
 model  = FcnAlexnetModel(config)
 
 model.build()
+```
+* (*Optional*) Create a builder for saving the model 
+
+```python
+builder = tf.saved_model.builder.SavedModelBuilder(config.final_model_dir)
+```
+
+* Create a session
+
+```python
+from tensorflow as tf
+
+sess = tf.Session()
 ```
 
 * Create an instance of logger for saving checkpoints and summaries.
@@ -88,23 +93,72 @@ from trainers.road_trainer import RoadTrainer
 trainer = RoadTrainer(sess,model,data,config,logger)
 ```
 
-* Load your model if exists
-
-```python
-model.load(sess)
-```
-
 * Train your model by the trainer
 
 ```python
 trainer.train()
 ```
 
+*(*Optional*) Load your model if exists, then saving the final model in binary files. These files will be used for predicting the results or deploying with TensorFlow Serving. 
+
+```python
+model.load(sess)
+print("Saving the final model..")
+builder.add_meta_graph_and_variables(sess,
+                                   [tf.saved_model.tag_constants.TRAINING],
+                                   signature_def_map=None,
+                                   assets_collection=None)
+builder.save()
+print("Final model saved")
+```
+
 * Close the session when you finish 
+
 ```python
 sess.close()
 ```
 
+***2. Prediction with trained model***
+
+* If you don't close the the training session yet, you can predict the result by insert directly these lines before closing the session : 
+
+````python
+model.load(sess)
+test = [data.get_data_element("test_data",i) for i in range(5)]
+for item in test :
+    img = item[0]
+    mask = item[1]
+    model.predict(sess,img,mask)
+    
+sess.close()
+````
+* Or if you want to predict the results in another session
+
+```python
+with tf.Session() as sess:   
+    print("Loading final model ")
+    tf.saved_model.loader.load(sess, [tf.saved_model.tag_constants.TRAINING], config.final_model_dir)
+    print("Final model loaded")
+    test = [data.get_data_element("test_data",i) for i in range(5)]
+    for item in test :
+        img = item[0]
+        mask = item[1]
+        model.predict(sess,img,mask)
+```
+
+## How to run the demo project with python script ?
+
+***1. Start the training***
+
+```
+python road_main.py -c configs/unet_KittiRoadDataset_config.json
+```
+
+***2. Start Tensorboard visualization***
+
+````
+tensorboard --logdir=experiments/unet_kittiroad/summary/
+````
 
 ## Updates
 
@@ -113,10 +167,10 @@ sess.close()
 
 * [5 July 2019](https://github.com/kuro10/Semantic-Segmentation/tree/928f7b5b16fff1d7502bfe365353dd5c761abffe) : This version is the implementation of FCN-Alexnet, U-Net and FCN-8s (based on VGG16-Net), training with Kitti Road Dataset. Also, transfer learning and fine tuning are applied when using FCN-8s (restore weights from file [vgg16.npy](https://github.com/machrisaa/tensorflow-vgg), another solution is to use the checkpoint [vgg_16.ckpt](https://github.com/tensorflow/models/tree/master/research/slim) that will be developped in the future). The idea about "caching the frozen layers" is tested but not really work yet, this idea will be also developped in the future.
 
-*[9 July 2019]():
+* [9 July 2019](https://github.com/kuro10/Semantic-Segmentation/tree/a8b75376c7e4b099ff50be99c0cb5045069cf50f): This version update the demos for training and predicting with Kitti Road Dataset, by using FCN-AlexNet, U-Net and FCN-8s (demos in files notebook *.ipynb*). However, there is also some bugs with the save and restore the model. In fact, the model cannot be restored when using the module tf.train.Saver, but it works if i use the module tf.saved_model. 
 
 ## References
 
 
-The template is inspired from [TensorFlow Project Template](https://github.com/MrGemy95/Tensorflow-Project-Template)
+The template is inspired from [TensorFlow Project Template](https://github.com/MrGemy95/Tensorflow-Project-Template) and 
 
