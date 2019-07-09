@@ -151,7 +151,7 @@ with tf.Session() as sess:
 ***1. Start the training***
 
 ```
-python road_main.py -c configs/unet_KittiRoadDataset_config.json
+python road_segmentation.py -c configs/unet_KittiRoadDataset_config.json
 ```
 
 ***2. Start Tensorboard visualization***
