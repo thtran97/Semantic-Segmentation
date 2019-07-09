@@ -172,5 +172,5 @@ tensorboard --logdir=experiments/unet_kittiroad/summary/
 ## References
 
 
-The template is inspired from [TensorFlow Project Template](https://github.com/MrGemy95/Tensorflow-Project-Template) and 
+The template is inspired from [TensorFlow Project Template](https://github.com/MrGemy95/Tensorflow-Project-Template).
 
