@@ -44,8 +44,8 @@ class KittiRoadLoader(DataLoader):
         self.train_mask = self.all_masks[:200]
         
         # Read the valid data images and their masks
-        self.valid_data = self.all_images[200:250] 
-        self.valid_mask = self.all_masks[200:250] 
+        self.valid_data = self.all_images[200:300] 
+        self.valid_mask = self.all_masks[200:300] 
         
         # Read the test data images and their masks
         self.test_data = self.all_images[300:]
