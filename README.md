@@ -118,7 +118,7 @@ print("Final model saved")
 sess.close()
 ```
 
-***2. Prediction with trained model***
+***2. Predict results with trained model***
 
 * If you don't close the the training session yet, you can predict the result by insert directly these lines before closing the session : 
 
