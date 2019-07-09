@@ -6,7 +6,7 @@
 
 
 
-This git is my learning about Semantic Segmentation tasks with TensorFlow and Keras. At first, I start this project with some basic deep learning models for semantic segmentation, such as FCN and U-Net. These models is trained with Kitti Road Dataset ( download [here](http://www.cvlibs.net/datasets/kitti/eval_road.php)). 
+This git is my learning about Semantic Segmentation tasks with TensorFlow and Keras. At first, I start this project with some basic deep learning models in semantic segmentation task, such as FCN (Fully Convolutional Network) and U-Net. These models are trained with Kitti Road Dataset ( download [here](http://www.cvlibs.net/datasets/kitti/eval_road.php)). 
 
 
 ## How to use in Jupyter Notebook ?
