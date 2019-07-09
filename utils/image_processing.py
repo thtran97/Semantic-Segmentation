@@ -19,10 +19,11 @@ def label_indices(colormap,colormap2label) :
     return colormap2label[idx]
 
 def crop_image(img,x,y,crop_size) : 
-    if x+crop_size[0] < img.shape[0] and  y+crop_size[1] < img.shape[1] : 
+    if (x+crop_size[0] < img.shape[0]) and (y+crop_size[1] < img.shape[1]) : 
         return  img[x:x+crop_size[0],y:y+crop_size[1]]
-    else :    
-        print("Error on crop_size !")
+#     else :    
+# #         print("Error on crop_size !")
+     
 
 
 
