@@ -50,16 +50,16 @@ class PascalVocLoader(DataLoader):
         print("Size of masks collection : ",self.all_masks.shape)
         
         # Read the training data images and their masks
-        self.train_data = self.all_images[:200]
-        self.train_mask = self.all_masks[:200]
+        self.train_data = self.all_images[:self.config.train_size]
+        self.train_mask = self.all_masks[:self.config.train_size]
         
         # Read the valid data images and their masks
-        self.valid_data = self.all_images[200:300] 
-        self.valid_mask = self.all_masks[200:300] 
+        self.valid_data = self.all_images[self.config.train_size:self.config.train_size+self.config.valid_size] 
+        self.valid_mask = self.all_masks[self.config.train_size:self.config.train_size+self.config.valid_size] 
         
         # Read the test data images and their masks
-        self.test_data = self.all_images[300:]
-        self.test_mask = self.all_masks[300:]
+        self.test_data = self.all_images[self.config.train_size+self.config.valid_size:]
+        self.test_mask = self.all_masks[self.config.train_size+self.config.valid_size:]
         
         # free some unused vars
 #         self.all_images, self.all_masks, self.all_raw_images, self.all_raw_masks, self.all_raw_labels = [],[],[],[],[]
@@ -123,15 +123,18 @@ class PascalVocLoader(DataLoader):
             print("[Error from display_data_element] : which_data parameter is invalid ! It can be train_data or test_data")
             
     def preprocess_data(self):
+        
+        # data augementation by flipping 
+        new_images = [np.flip(img,axis=1) for img in self.all_raw_images]
+        self.all_raw_images = np.concatenate((self.all_raw_images,new_images),axis=0)
+        new_masks = [np.flip(img,axis=1) for img in self.all_raw_masks]
+        self.all_raw_masks = np.concatenate((self.all_raw_masks,new_masks),axis=0)
+        
         # export some images with the input size by sliding from the raw images 
         self.all_images = [img_process.crop_image(img,0,0,self.config.image_size) for img in self.all_raw_images if (self.config.image_size[0] < img.shape[0]) and (self.config.image_size[1] < img.shape[1]) ]
         self.all_masks = [img_process.crop_image(img,0,0,self.config.image_size) for img in self.all_raw_masks if (self.config.image_size[0] < img.shape[0]) and (self.config.image_size[1] < img.shape[1])]
         
-#         # data augementation by flipping 
-#         new_images = [np.flip(img,axis=1) for img in self.all_images]
-#         self.all_images = np.concatenate((self.all_images,new_images),axis=0)
-#         new_masks = [np.flip(img,axis=1) for img in self.all_masks]
-#         self.all_masks = np.concatenate((self.all_masks,new_masks),axis=0)
+
         
         # shuffle
         self.all_images,self.all_masks = shuffle(self.all_images,self.all_masks)
