@@ -1,0 +1,13 @@
+{
+  "exp_name": "fcn_Vaihingen",
+  "num_epochs": 30,
+  "num_iter_per_epoch": 300,
+  "learning_rate": 0.01,
+  "batch_size": 4,
+  "max_to_keep":5,
+  "data_path": "C:\\Users\\TT260256\\My Project\\NNs\\ISPRS_benchmarks_datasets\\Vaihingen\\",
+  "image_size" : [256,256,3],
+  "n_classes" : 2,
+  "loss" : "scce",
+  "accuracy" : "sparse_categorical_crossentropy" 
+}

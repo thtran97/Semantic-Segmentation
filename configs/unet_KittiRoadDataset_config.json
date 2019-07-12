@@ -7,6 +7,9 @@
   "max_to_keep":5,
   "data_path": "C:/Users/TT260256/My Project/NNs/data_road",
   "image_size" : [320,480,3],
-  "loss" : "bce_dice_loss",
-  "accuracy" : "dice_coeff" 
+  "n_classes" : 2,
+  "train_size":200,
+  "valid_size":50,
+  "loss" : "scce",
+  "accuracy" : "sparse_categorical_crossentropy" 
 }

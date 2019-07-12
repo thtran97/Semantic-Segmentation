@@ -1,12 +1,15 @@
 {
   "exp_name": "unet_pascalvoc2012",
   "num_epochs": 30,
-  "num_iter_per_epoch": 100,
+  "num_iter_per_epoch": 200,
   "learning_rate": 0.00023949513325777832,
-  "batch_size": 2,
+  "batch_size": 4,
   "max_to_keep":5,
   "data_path": "C:/Users/TT260256/My Project/NNs/PASCAL_VOC/VOCdevkit/VOC2012",
   "image_size" : [320,480,3],
-  "loss" : "bce_dice_loss",
-  "accuracy" : "dice_coeff" 
+  "n_classes" : 21,
+  "train_size":1600,
+  "valid_size":20,
+  "loss" : "scce",
+  "accuracy" : "sparse_categorical_crossentropy" 
 }
