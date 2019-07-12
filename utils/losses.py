@@ -18,8 +18,12 @@ def f_loss(y_true, y_pred,loss_name=None):
         loss = tf.keras.losses.binary_crossentropy(y_true, y_pred) + dice_loss(y_true, y_pred)
     elif loss_name == "dice_loss" : 
         loss = dice_loss(y_true, y_pred)
-    else : 
+    elif loss_name == "bce" : 
         loss = tf.keras.losses.binary_crossentropy(y_true, y_pred)
+    elif loss_name == "scce" : 
+        loss = tf.keras.losses.sparse_categorical_crossentropy(y_true, y_pred)
+    elif loss_name == "scce_dice_loss" : 
+        loss = tf.keras.losses.sparse_categorical_crossentropy(y_true, y_pred) + dice_loss(y_true, y_pred)
     return loss
 
 

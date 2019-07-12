@@ -12,6 +12,9 @@ def dice_coeff(y_true,y_pred) :
 def f_accuracy(y_true,y_pred,acc_name=None):
     if acc_name == "dice_coeff" :
         acc = dice_coeff(y_true,y_pred)
-    else :
+    elif acc_name == "binary" :
         acc = tf.keras.metrics.binary_accuracy(y_true,y_pred)
+#     elif acc_name ==  "sparse_categorical":
+    else:
+        acc = tf.keras.metrics.sparse_categorical_accuracy(y_true,y_pred)
     return acc
