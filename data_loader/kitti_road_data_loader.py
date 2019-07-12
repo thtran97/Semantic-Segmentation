@@ -1,6 +1,6 @@
 """
 Implement the KittiRoadLoader class by inheriting the DataLoader class
-Load data frol the Kitty Road dataset and preprocess it...
+Load data from the Kitty Road dataset and preprocess it...
 ## Reference to : https://github.com/SantoshPattar/ConvNet-OOP
 ## Dataset link  : http://www.cvlibs.net/datasets/kitti/eval_road.php
 """
@@ -40,16 +40,16 @@ class KittiRoadLoader(DataLoader):
         print("Size of masks collection : ",self.all_masks.shape)
         
         # Read the training data images and their masks
-        self.train_data = self.all_images[:200]
-        self.train_mask = self.all_masks[:200]
+        self.train_data = self.all_images[:self.config.train_size]
+        self.train_mask = self.all_masks[:self.config.train_size]
         
         # Read the valid data images and their masks
-        self.valid_data = self.all_images[200:300] 
-        self.valid_mask = self.all_masks[200:300] 
+        self.valid_data = self.all_images[self.config.train_size:self.config.train_size+self.config.valid_size] 
+        self.valid_mask = self.all_masks[self.config.train_size:self.config.train_size+self.config.valid_size] 
         
         # Read the test data images and their masks
-        self.test_data = self.all_images[300:]
-        self.test_mask = self.all_masks[300:]
+        self.test_data = self.all_images[self.config.train_size+self.config.valid_size:]
+        self.test_mask = self.all_masks[self.config.train_size+self.config.valid_size:]
         
         # free some unused vars
         self.all_images, self.all_masks, self.all_raw_images, self.all_raw_masks, self.all_raw_labels = [],[],[],[],[]
