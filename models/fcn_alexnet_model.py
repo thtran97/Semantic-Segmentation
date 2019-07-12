@@ -28,7 +28,7 @@ class FcnAlexnetModel(BaseModel):
     def build(self):
         self.is_training = tf.placeholder(tf.bool)
         [self.height,self.width,self.channels] = self.config.image_size
-        self.n_classes = 2
+        self.n_classes = self.config.n_classes
         with tf.name_scope("inputs") : 
             self.X = tf.placeholder(tf.float32,shape=(None,self.height,self.width,self.channels),name="X")
             self.y = tf.placeholder(tf.int32,shape=(None,self.height,self.width),name="y")
@@ -100,19 +100,31 @@ class FcnAlexnetModel(BaseModel):
                                 padding="VALID",
                                 name="conv7")
 
-        self.logits = tf.layers.conv2d_transpose(self.conv7,filters=self.n_classes,
+#         self.logits = tf.layers.conv2d_transpose(self.conv7,filters=self.n_classes,
+#                                         kernel_size=63,
+#                                         strides = 32,
+#                                         padding = "SAME",
+#                                         name="logits")
+
+#         with tf.name_scope("output") : 
+#             self.y_proba = tf.nn.sigmoid(self.logits,name="y_proba")
+#             self.output = tf.reduce_max(self.y_proba,axis=3,name="output")
+
+        self.output = tf.layers.conv2d_transpose(self.conv7,filters=self.n_classes,
                                         kernel_size=63,
                                         strides = 32,
                                         padding = "SAME",
-                                        name="logits")
-
-        with tf.name_scope("output") : 
-            self.y_proba = tf.nn.sigmoid(self.logits,name="y_proba")
-            self.output = tf.reduce_max(self.y_proba,axis=3,name="output")
+                                        activation = tf.nn.softmax,
+                                        name="output")
+    
+        with tf.name_scope('flatten'):
+            self.out_flatten = tf.reshape(self.output,shape=(-1,self.height*self.width,self.n_classes),name="output_flat")
+            self.y_flatten = tf.reshape(self.y,shape=(-1,self.height*self.width),name="y_flatten")
 
         with tf.name_scope("loss") : 
-            self.loss_op = tf.reduce_mean(ul.f_loss(tf.cast(self.y,tf.float32),self.output,self.config.loss),name="fcn_loss")
-                        
+#             self.loss_op = tf.reduce_mean(ul.f_loss(tf.cast(self.y,tf.float32),self.output,self.config.loss),name="fcn_loss")
+            self.loss_op = tf.reduce_mean(ul.f_loss(self.y_flatten,self.out_flatten,self.config.loss),name="fcn_loss")
+
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops): 
                 self.optimizer = tf.train.AdamOptimizer(self.config.learning_rate) 
@@ -121,8 +133,11 @@ class FcnAlexnetModel(BaseModel):
                 self.training_step =self.optimizer.minimize(self.loss_op,global_step=self.global_step_tensor,name="training_op")
                 
         with tf.name_scope("eval") : 
-            self.accuracy = tf.reduce_mean(um.f_accuracy(tf.cast(self.y,tf.float32),self.output,self.config.accuracy),name="accuracy")
-
+#             self.accuracy = tf.reduce_mean(um.f_accuracy(tf.cast(self.y,tf.float32),self.output,self.config.accuracy),name="accuracy")
+            self.accuracy = tf.reduce_mean(um.f_accuracy(self.y_flatten,self.out_flatten,self.config.accuracy),name="accuracy")
+            self.pred_flatten = tf.argmax(self.out_flatten,axis=2)
+            self.pred = tf.reshape(self.pred_flatten,shape=(-1,self.height,self.width),name="pred")
+            
         print("Model built successfully.")
                
     def predict(self,sess,im_input,im_output=None) :

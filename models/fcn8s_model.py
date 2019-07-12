@@ -28,7 +28,7 @@ class Fcn8sModel(BaseModel):
         
         self.is_training = tf.placeholder(tf.bool)
         [self.height,self.width,self.channels] = self.config.image_size
-        self.n_classes = 2
+        self.n_classes = self.config.n_classes
         with tf.name_scope("inputs") : 
             self.X = tf.placeholder(tf.float32,shape=(None,self.height,self.width,self.channels),name="X")
             self.y = tf.placeholder(tf.int32,shape=(None,self.height,self.width),name="y")
