@@ -3,11 +3,13 @@ import os
 import matplotlib.pyplot as plt
 from scipy.misc import *
 import numpy as np
+import scipy
+from PIL import Image
 
 
 #Create a function to convert each pixel label to colour, given a color dict
 def grayscale_to_colour(image,colordict):
-    print('Converting image...')
+#     print('Converting image...')
     image = image.reshape((image.shape[0], image.shape[1], 1))
     image = np.repeat(image, 3, axis=-1)
     for i in range(image.shape[0]):
@@ -18,13 +20,13 @@ def grayscale_to_colour(image,colordict):
 
 #Create a function to convert each pixel label to background colour, given a color dict
 def grayscale_to_background(image,colordict):
-    print('Converting background image...')
+#     print('Converting background image...')
     image = image.reshape((image.shape[0], image.shape[1], 1))
     image = np.repeat(image, 4, axis=-1)
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
             label = int(image[i][j][0])
-            image[i][j] = np.array(colordict[label] + [127]) 
+            image[i][j] = np.array(colordict[label] + [100]) 
     return image
 
 def visualize_output(image,mask,colordict):
@@ -36,3 +38,7 @@ def visualize_output(image,mask,colordict):
     plt.show()
 #     imsave(photo_dir + "/image_%s.png" %(i*10 + j), converted_image)
     return street_im
+
+def save_output(image,path) : 
+    im = Image.fromarray(np.array(image))
+    im.save(path)

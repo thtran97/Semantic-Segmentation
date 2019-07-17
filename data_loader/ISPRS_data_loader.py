@@ -106,14 +106,29 @@ class ISPRSLoader(DataLoader):
 
     
         # data augementation by flipping 
-        new_images = [np.flip(img,axis=1) for img in self.train_norm_image] # + [np.flip(img,axis=0) for img in self.train_norm_image]
-        self.train_norm_image = np.concatenate((self.train_norm_image,new_images),axis=0)
-        new_masks = [np.flip(img,axis=1) for img in self.train_norm_mask] # + [np.flip(img,axis=0) for img in self.train_norm_mask]
-        self.train_norm_mask = np.concatenate((self.train_norm_mask,new_masks),axis=0)
+#         new_images = [np.flip(img,axis=1) for img in self.train_norm_image] # + [np.flip(img,axis=0) for img in self.train_norm_image]
+        self.train_norm_image = np.concatenate((self.train_norm_image,[np.flip(img,axis=1) for img in self.train_norm_image]),axis=0)
+#         new_masks = [np.flip(img,axis=1) for img in self.train_norm_mask] # + [np.flip(img,axis=0) for img in self.train_norm_mask]
+        self.train_norm_mask = np.concatenate((self.train_norm_mask,[np.flip(img,axis=1) for img in self.train_norm_mask]),axis=0)
+                
+#         new_images = [np.flip(img,axis=1) for img in self.train_norm_image] # + [np.flip(img,axis=0) for img in self.train_norm_image]
+        self.train_norm_image = np.concatenate((self.train_norm_image,[np.flip(img,axis=0) for img in self.train_norm_image]),axis=0)
+#         new_masks = [np.flip(img,axis=1) for img in self.train_norm_mask] # + [np.flip(img,axis=0) for img in self.train_norm_mask]
+        self.train_norm_mask = np.concatenate((self.train_norm_mask,[np.flip(img,axis=0) for img in self.train_norm_mask]),axis=0)
+#         new_images = [np.flip(img,axis=0) for img in self.train_norm_image] 
+#         self.train_norm_image = np.concatenate((self.train_norm_image,new_images),axis=0)
+#         new_masks = [np.flip(img,axis=0) for img in self.train_norm_mask] 
+#         self.train_norm_mask = np.concatenate((self.train_norm_mask,new_masks),axis=0)
+        
+        # rotate 90
+#         new_images = [np.rot90(img) for img in self.train_norm_image] 
+        self.train_norm_image = np.concatenate((self.train_norm_image,[np.rot90(img) for img in self.train_norm_image]),axis=0)
+#         new_masks = [np.rot90(img) for img in self.train_norm_mask] 
+        self.train_norm_mask = np.concatenate((self.train_norm_mask,[np.rot90(img) for img in self.train_norm_mask]),axis=0)
         
         # shuffle
         self.train_norm_image,self.train_norm_mask = shuffle(self.train_norm_image,self.train_norm_mask)
-        self.valid_norm_image,self.valid_norm_mask = shuffle(self.valid_norm_image,self.valid_norm_mask)
+#         self.valid_norm_image,self.valid_norm_mask = shuffle(self.valid_norm_image,self.valid_norm_mask)
         
         # normalization 
         self.train_norm_image = np.array(self.train_norm_image).astype(np.float32) / 255.0

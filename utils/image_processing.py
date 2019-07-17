@@ -10,8 +10,10 @@ def build_colormap2label(colordict) :
         index  = colormap[0]*256**2 + colormap[1]*256 + colormap[2]
         # define the label of this color
 #         colormap2label[index] = i     
-        if i == 2 : #building
+        if i == 1 : #road
             colormap2label[index] = 1
+        elif i == 2 : #building
+            colormap2label[index] = 2
         else : 
             colormap2label[index] = 0     
     return colormap2label

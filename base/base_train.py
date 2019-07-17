@@ -22,7 +22,7 @@ class BaseTrain:
         for cur_epoch in range(self.model.cur_epoch_tensor.eval(self.sess), num_epochs, 1):
             if self.stop : 
                 break 
-            print("Epoch ",cur_epoch)
+            print("Epoch ",cur_epoch," : learning_rate = ", self.sess.run(self.model.learning_rate))
             self.sess.run(self.model.increment_cur_epoch_tensor)
             self.train_epoch()
         

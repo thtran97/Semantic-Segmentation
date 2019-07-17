@@ -71,17 +71,22 @@ class AerialImageTrainer(BaseTrain):
     def evaluate_model(self):
         losses = []
         accs = []
+        ious = []
         for X_valid_batch,y_valid_batch in self.data.shuffle_batch(self.config.batch_size,"valid") :
-            loss,acc = self.sess.run([self.model.loss_op,
-                           self.model.accuracy],
+            loss,acc,_,iou = self.sess.run([self.model.loss_op,
+                           self.model.accuracy,self.model.conf_mat,self.model.mean_iou],
                            feed_dict = {self.model.X : X_valid_batch, self.model.y : y_valid_batch, self.model.is_training : False })
             losses.append(loss)
             accs.append(acc)
+            ious.append(iou)
         
         loss = np.mean(losses)
         acc = np.mean(accs)
+        m_iou = np.mean(iou)
+        
         print("-->Last test loss      : ",loss)
         print("-->Last test accuracy  : ",acc)
+        print("-->Last test mean iou  : ",m_iou)
         
         return loss,acc
 

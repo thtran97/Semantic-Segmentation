@@ -32,6 +32,7 @@ class FcnBaseModel(BaseModel):
                                  strides=2,
                                  padding="VALID",
                                  activation=tf.nn.relu,
+                                 kernel_regularizer=tf.keras.regularizers.l2(0.0005),
                                  name="conv1_1")
         
         self.conv1_2 = tf.layers.conv2d(self.conv1_1,filters=32,
@@ -39,6 +40,7 @@ class FcnBaseModel(BaseModel):
                          strides=1,
                          padding="SAME",
                          activation=tf.nn.relu,
+                         kernel_regularizer=tf.keras.regularizers.l2(0.0005),
                          name="conv1_2")
 
         self.pool1 = tf.nn.max_pool(self.conv1_2,ksize=[1,2,2,1],strides=[1,2,2,1],padding="SAME",name="pool_1")
@@ -48,6 +50,7 @@ class FcnBaseModel(BaseModel):
                                  strides=1,
                                  padding="SAME",
                                  activation=tf.nn.relu,
+                                 kernel_regularizer=tf.keras.regularizers.l2(0.0005),
                                  name="conv2_1")
         
         self.conv2_2 = tf.layers.conv2d(self.conv2_1,filters=64,
@@ -55,6 +58,7 @@ class FcnBaseModel(BaseModel):
                          strides=1,
                          padding="SAME",
                          activation=tf.nn.relu,
+                         kernel_regularizer=tf.keras.regularizers.l2(0.0005),
                          name="conv2_2")
 
         self.pool2 = tf.nn.max_pool(self.conv2_2,ksize=[1,2,2,1],strides=[1,2,2,1],padding="SAME",name="pool_2")
@@ -64,6 +68,7 @@ class FcnBaseModel(BaseModel):
                                  strides=1,
                                  padding="SAME",
                                  activation=tf.nn.relu,
+                                 kernel_regularizer=tf.keras.regularizers.l2(0.0005),
                                  name="conv3_1")
         
         self.conv3_2 = tf.layers.conv2d(self.conv3_1,filters=96,
@@ -71,6 +76,7 @@ class FcnBaseModel(BaseModel):
                          strides=1,
                          padding="SAME",
                          activation=tf.nn.relu,
+                         kernel_regularizer=tf.keras.regularizers.l2(0.0005),
                          name="conv3_2")
 
         self.pool3 = tf.nn.max_pool(self.conv3_2,ksize=[1,2,2,1],strides=[1,2,2,1],padding="SAME",name="pool_3")
@@ -80,6 +86,7 @@ class FcnBaseModel(BaseModel):
                                  strides=1,
                                  padding="SAME",
                                  activation=tf.nn.relu,
+                                 kernel_regularizer=tf.keras.regularizers.l2(0.0005),
                                  name="conv4_1")
         
         self.conv4_2 = tf.layers.conv2d(self.conv4_1,filters=128,
@@ -87,6 +94,7 @@ class FcnBaseModel(BaseModel):
                          strides=1,
                          padding="SAME",
                          activation=tf.nn.relu,
+                         kernel_regularizer=tf.keras.regularizers.l2(0.0005),
                          name="conv4_2")
 
         self.pool4 = tf.nn.max_pool(self.conv4_2,ksize=[1,2,2,1],strides=[1,2,2,1],padding="SAME",name="pool_4")
@@ -121,11 +129,12 @@ class FcnBaseModel(BaseModel):
             self.loss_op = tf.reduce_mean(ul.f_loss(self.y_flatten,self.out_flatten,self.config.loss),name="fcn_loss")
 
             starter_learning_rate = self.config.learning_rate
-            self.learning_rate=tf.compat.v1.train.exponential_decay(starter_learning_rate, self.global_step_tensor,1000, 0.5, staircase=True)
+            self.learning_rate=tf.compat.v1.train.exponential_decay(starter_learning_rate, self.global_step_tensor,15000, 0.1,staircase=True)
 
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops): 
-                self.optimizer = tf.train.AdamOptimizer() 
+                self.optimizer = tf.train.AdamOptimizer(self.learning_rate)
+#                 self.optimizer = tf.train.MomentumOptimizer(self.learning_rate,momentum=0.9)
                 # training by optimizing the loss function
                 # increment global_step by 1 after a training step
                 self.training_step =self.optimizer.minimize(self.loss_op,global_step=self.global_step_tensor,name="training_op")
@@ -135,7 +144,8 @@ class FcnBaseModel(BaseModel):
             self.accuracy = tf.reduce_mean(um.f_accuracy(self.y_flatten,self.out_flatten,self.config.accuracy),name="accuracy")
             self.pred_flatten = tf.argmax(self.out_flatten,axis=2)
             self.pred = tf.reshape(self.pred_flatten,shape=(-1,self.height,self.width),name="pred")
-            
+            self.mean_iou,self.conf_mat = tf.metrics.mean_iou(self.y_flatten,self.pred_flatten,self.n_classes)
+
         print("Model built successfully.")
                
     def predict(self,sess,im_input,im_output=None) :
@@ -144,20 +154,20 @@ class FcnBaseModel(BaseModel):
         output_pred = sess.run(self.pred,feed_dict={self.X : [im_input],self.is_training:False})
 #         segmentation = (output_pred>0).reshape(self.height,self.width)
         
-        if im_input is None : 
-            plt.subplot(121)
-            plt.imshow(im_input)
-            plt.subplot(122)
-            plt.imshow(segmentation)
-        else :    
-            plt.subplot(131)
-            plt.imshow(im_input)
-            plt.subplot(132)
-            plt.imshow(im_output)
-            plt.subplot(133)
-            plt.imshow(segmentation)
+#         if im_input is None : 
+#             plt.subplot(121)
+#             plt.imshow(im_input)
+#             plt.subplot(122)
+#             plt.imshow(output_pred[0])
+#         else :    
+#             plt.subplot(131)
+#             plt.imshow(im_input)
+#             plt.subplot(132)
+#             plt.imshow(im_output)
+#             plt.subplot(133)
+#             plt.imshow(output_pred[0])
             
-        plt.show()    
+#         plt.show()    
         
 #         mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
 #         mask = scipy.misc.toimage(mask, mode="RGBA")
@@ -169,7 +179,7 @@ class FcnBaseModel(BaseModel):
         if im_output is not None:
             acc = sess.run(self.accuracy,feed_dict={self.X : [im_input], self.y : [im_output], self.is_training:False})
             print("Accuracy : ",acc)
-            return segmentation,acc
+            return output_pred[0],acc
         
             
     
