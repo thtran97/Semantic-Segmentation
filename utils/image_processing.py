@@ -35,7 +35,15 @@ def split_image(img,split_size):
     res = []
     for x in range(0,img.shape[0],split_size[0]) : 
         for y in range(0,img.shape[1],split_size[1]):
-            if x+split_size[0] < img.shape[0] and y+split_size[1] < img.shape[1] : 
+            if x+split_size[0] <= img.shape[0] and y+split_size[1] <= img.shape[1] : 
                 subimg = img[x:x+split_size[0],y:y+split_size[1]]
                 res.append(subimg)
     return res
+
+def merge_image(img,img_list,split_size):
+    new_img = np.zeros(img.shape)
+    for x in range(0,img.shape[0],split_size[0]) : 
+        for y in range(0,img.shape[1],split_size[1]):
+            if x+split_size[0] <= img.shape[0] and y+split_size[1] <= img.shape[1] : 
+                new_img[x:x+split_size[0],y:y+split_size[1]] = img_list.pop(0)
+    return new_img
