@@ -112,7 +112,7 @@ trainer = RoadTrainer(sess,model,data,config,logger)
 trainer.train()
 ```
 
-*(*Optional*) Load your model if exists, then saving the final model in binary files. These files will be used for predicting the results or deploying with TensorFlow Serving. 
+* (*Optional*) Load your model if exists, then saving the final model in binary files. These files will be used for predicting the results or deploying with TensorFlow Serving. 
 
 ```python
 model.load(sess)
