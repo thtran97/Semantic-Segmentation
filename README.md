@@ -40,7 +40,7 @@ learning rate ?
 
 "batch_size" : Number of samples used for training in each iteration
 
-"max_to_keep" :  Number of checkpoints maximum that you want to keep
+"max_to_keep" :  Number maximum of checkpoints that you want to keep
 
 "data_path" : Path to dataset
 
