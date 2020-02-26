@@ -6,7 +6,7 @@
 
 
 
-This git is my implemtation about Semantic Segmentation tasks with TensorFlow and Keras. At first step, I started this project with some basic deep learning models in semantic segmentation task, such as FCN (Fully Convolutional Network) and U-Net. These models are trained with Kitti Road Dataset (download [here](http://www.cvlibs.net/datasets/kitti/eval_road.php)) and ISPRS Dataset ([link dataset](http://www2.isprs.org/commissions/comm3/wg4/tests.html)). 
+This git is my dummy implemetation about Semantic Segmentation tasks with TensorFlow and Keras. At first step, I started this project with some basic deep learning models in semantic segmentation task, such as FCN (Fully Convolutional Network) and U-Net. These models are trained with Kitti Road Dataset (download [here](http://www.cvlibs.net/datasets/kitti/eval_road.php)) and ISPRS Dataset ([link dataset](http://www2.isprs.org/commissions/comm3/wg4/tests.html)). 
 
 ## Updates
 
