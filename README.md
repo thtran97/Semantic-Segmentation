@@ -6,7 +6,7 @@
 
 
 
-This git is my dummy implemetation about Semantic Segmentation tasks with TensorFlow and Keras. At first step, I started this project with some basic deep learning models in semantic segmentation task, such as FCN (Fully Convolutional Network) and U-Net. These models are trained with Kitti Road Dataset (download [here](http://www.cvlibs.net/datasets/kitti/eval_road.php)) and ISPRS Dataset ([link dataset](http://www2.isprs.org/commissions/comm3/wg4/tests.html)). 
+This git is my dummy implemetation of Semantic Segmentation tasks with TensorFlow and Keras. At first step, I started this project with some basic deep learning models in semantic segmentation task, such as FCN (Fully Convolutional Network) and U-Net. These models are trained with Kitti Road Dataset (download [here](http://www.cvlibs.net/datasets/kitti/eval_road.php)) and ISPRS Dataset ([link dataset](http://www2.isprs.org/commissions/comm3/wg4/tests.html)). 
 
 ## Updates
 
@@ -15,7 +15,7 @@ This git is my dummy implemetation about Semantic Segmentation tasks with Tensor
 
 * [5 July 2019](https://github.com/kuro10/Semantic-Segmentation/tree/928f7b5b16fff1d7502bfe365353dd5c761abffe) : This version is the implementation of FCN-Alexnet, U-Net and FCN-8s (based on VGG16-Net), training with Kitti Road Dataset. Also, transfer learning and fine tuning are applied when using FCN-8s (restore weights from file [vgg16.npy](https://github.com/machrisaa/tensorflow-vgg), another solution is to use the checkpoint [vgg_16.ckpt](https://github.com/tensorflow/models/tree/master/research/slim) that will be developped in the future). The idea about "caching the frozen layers" is tested but not really work yet, this idea will be also developped in the future.
 
-* [9 July 2019](https://github.com/kuro10/Semantic-Segmentation/tree/99b821353d957016ecc2a3873303f3e9d730c5f8): This version update the demos for training and predicting with Kitti Road Dataset, by using FCN-AlexNet, U-Net and FCN-8s (demos in files notebook *.ipynb*). However, there is also some bugs about saving and restoring the model. In fact, the model cannot be restored when using the module **tf.train.Saver**, but it works if I use the module **tf.saved_model**. Any idea? 
+* [9 July 2019](https://github.com/kuro10/Semantic-Segmentation/tree/99b821353d957016ecc2a3873303f3e9d730c5f8): This version updates the demos for training and predicting with Kitti Road Dataset, by using FCN-AlexNet, U-Net and FCN-8s (demos in files notebook *.ipynb*). However, there are also some bugs about saving and restoring the model. In fact, the model cannot be restored when using the module **tf.train.Saver**, but it works if I use the module **tf.saved_model**. Any idea? 
 
 * [18 July 2019](https://github.com/kuro10/Semantic-Segmentation/tree/6e5cd740f9f10143087cd8ec5e146b4a9fc1ee52): This version deals with ISPRS Dataset (on the Vaihingen dataset) along with the implementation of the base FCN in semantic labeling task. The model is tested with only 3 classes : road, buiding and background. 
 
